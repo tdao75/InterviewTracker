@@ -92,3 +92,14 @@ flowchart TD
     WORKER --> MAIL[Mailpit Email Inbox]
     WORKER --> INBOX[(Processed Messages)]
 ```
+
+## Application Screenshots
+
+### Dashboard
+![InterviewTracker Dashboard](docs/screenshots/dashboard.png)
+
+### Interview Calendar
+![Interview Calendar](docs/screenshots/calendar.png)
+
+### Job Applications
+![Job Applications](docs/screenshots/applications.png)

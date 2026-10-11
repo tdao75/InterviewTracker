@@ -103,3 +103,10 @@ flowchart TD
 
 ### Job Applications
 ![Job Applications](docs/screenshots/applications.png)
+
+## Technical Documentation
+
+For a detailed explanation of the project structure, architecture,
+authentication, database design, RabbitMQ messaging, and Docker setup, see:
+
+[Technical Architecture and Project Structure](docs/TECHNICAL_OVERVIEW.md)

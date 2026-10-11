@@ -1,0 +1,24 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: interviewtracker-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: interviewuser
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in .env}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+    
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: interviewtracker-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:

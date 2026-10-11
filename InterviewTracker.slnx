@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="InterviewTracker.Api/InterviewTracker.Api.csproj" />
+  <Project Path="InterviewTracker.NotificationWorker/InterviewTracker.NotificationWorker.csproj" />
+</Solution>

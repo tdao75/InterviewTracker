@@ -1,0 +1,35 @@
+@'
+# Visual Studio / .NET
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# React / Node
+**/node_modules/
+**/dist/
+**/build/
+*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/secrets.json
+*.pfx
+*.pem
+*.key
+
+# Database backups and local data
+Backups/
+*.bak
+*.mdf
+*.ldf
+
+# Logs and temporary files
+*.log
+*.tmp
+'@ | Set-Content -Path .gitignore -Encoding UTF8

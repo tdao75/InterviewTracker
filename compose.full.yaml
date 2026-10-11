@@ -1,0 +1,106 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+    ports:
+      - "14330:1433"
+    volumes:
+      - interviewtracker-sql-data:/var/opt/mssql
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASSWORD}"
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - interviewtracker-rabbit-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1026:1025"
+      - "8026:8025"
+    restart: unless-stopped
+
+  api:
+    image: interviewtracker-api:local
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:8080"
+      Jwt__Key: "${JWT_KEY}"
+      Jwt__Issuer: "InterviewTracker.Api"
+      Jwt__Audience: "InterviewTracker.Client"
+      Logging__LogLevel__Microsoft_EntityFrameworkCore_Database_Command: "Warning"
+
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=InterviewTrackerDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
+
+      RabbitMq__HostName: "rabbitmq"
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: "${RABBITMQ_USER}"
+      RabbitMq__Password: "${RABBITMQ_PASSWORD}"
+      RabbitMq__ExchangeName: "interviewtracker.events"
+      RabbitMq__QueueName: "interview-notifications"
+      RabbitMq__RoutingKey: "interview.scheduled"
+      RabbitMq__DeadLetterExchangeName: "interviewtracker.dead-letter"
+      RabbitMq__DeadLetterQueueName: "interview-notifications-dead"
+      RabbitMq__DeadLetterRoutingKey: "interview.failed"
+
+      Outbox__PollingSeconds: "5"
+      Outbox__BatchSize: "10"
+    ports:
+      - "5253:8080"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    restart: on-failure
+
+  worker:
+    image: interviewtracker-worker:local
+    environment:
+      DOTNET_ENVIRONMENT: "Development"
+
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=InterviewTrackerDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
+
+      RabbitMq__HostName: "rabbitmq"
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: "${RABBITMQ_USER}"
+      RabbitMq__Password: "${RABBITMQ_PASSWORD}"
+      RabbitMq__QueueName: "interview-notifications"
+      RabbitMq__DeadLetterExchangeName: "interviewtracker.dead-letter"
+      RabbitMq__DeadLetterQueueName: "interview-notifications-dead"
+      RabbitMq__DeadLetterRoutingKey: "interview.failed"
+      RabbitMq__ConnectionRetrySeconds: "5"
+
+      Smtp__Host: "mailpit"
+      Smtp__Port: "1025"
+      Smtp__FromName: "Interview Tracker"
+      Smtp__FromEmail: "notifications@interviewtracker.local"
+      
+      Logging__LogLevel__Microsoft_EntityFrameworkCore_Database_Command: "Warning"
+
+      Retry__MaxAttempts: "3"
+      Retry__DelaySeconds: "5"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+      - mailpit
+      - api
+    restart: on-failure
+
+  client:
+    image: interviewtracker-client:local
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+volumes:
+  interviewtracker-sql-data:
+  interviewtracker-rabbit-data:

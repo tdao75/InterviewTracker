@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/node_modules
+**/.vs
+**/.vscode
+**/.git
+**/coverage
+**/dist
+**/*.user
+**/*.suo

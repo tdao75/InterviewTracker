@@ -1,4 +1,4 @@
-# Interview Tracker
+﻿# Interview Tracker
 
 A full-stack application for tracking job applications and scheduling interviews.
 
@@ -52,3 +52,43 @@ MSSQL_SA_PASSWORD=your-strong-development-password
 RABBITMQ_USER=interviewuser
 RABBITMQ_PASSWORD=your-rabbitmq-password
 JWT_KEY=your-long-jwt-signing-key
+```
+
+### Start the Application
+
+From the project root, run:
+
+```powershell
+docker compose -f compose.full.yaml up -d --build
+```
+
+### Access the Application
+
+| Service | URL |
+|---|---|
+| React Frontend | http://localhost:5173 |
+| ASP.NET Core API | http://localhost:5253 |
+| Mailpit Email Inbox | http://localhost:8026 |
+
+### Stop the Application
+
+```powershell
+docker compose -f compose.full.yaml down
+```
+
+Docker volumes are preserved when stopping without the -v option.
+
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    UI[React + TypeScript] --> API[ASP.NET Core Web API]
+    API --> DB[(SQL Server)]
+    API --> OUTBOX[(Transactional Outbox)]
+    OUTBOX --> PUBLISHER[Outbox Processor]
+    PUBLISHER --> MQ[RabbitMQ]
+    MQ --> WORKER[Notification Worker]
+    WORKER --> MAIL[Mailpit Email Inbox]
+    WORKER --> INBOX[(Processed Messages)]
+```
